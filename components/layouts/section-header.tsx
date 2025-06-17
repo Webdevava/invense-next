@@ -18,11 +18,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   actions,
 }) => {
   return (
-    <section>
-      <header className="flex items-end justify-between gap-4">
+    <section className="w-full">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 ">
-            <h1 className="text-2xl font-medium truncate">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-1">
+            <h1 className="text-xl sm:text-2xl font-medium truncate">
               {title
                 .toLowerCase()
                 .replace(/\b\w/g, (char) => char.toUpperCase())}
@@ -44,16 +44,21 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
               </span>
             )}
           </div>
+
           {description && (
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed mt-1">
               {description}
             </p>
           )}
         </div>
+
         {actions && (
-          <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>
+          <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap flex-shrink-0">
+            {actions}
+          </div>
         )}
       </header>
+
       <Separator className="mt-2" />
     </section>
   );
