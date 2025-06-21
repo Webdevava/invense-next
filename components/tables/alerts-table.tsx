@@ -1,9 +1,10 @@
 'use client'
 import React, { useState } from 'react';
-import { AlertTriangle, AlertCircle, Info, CheckCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { AlertTriangle, AlertCircle, Info, CheckCircle, Search } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Separator } from '../ui/separator';
 
 export const AlertsTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -11,56 +12,68 @@ export const AlertsTable = () => {
   const alerts = [
     {
       id: 1,
-      title: "Temperature Spike",
-      severity: "critical",
+      panelNo: "PNL-001",
+      device: "iot-001",
+      alertType: "Temperature",
+      message: "Temperature Spike Detected",
       status: "active",
-      timestamp: "2024-06-03 15:00:00",
-      source: "iot-001"
+      priority: "critical",
+      timestamp: "2024-06-03 15:00:00"
     },
     {
       id: 2,
-      title: "Low Battery",
-      severity: "warning",
+      panelNo: "PNL-002",
+      device: "iot-042",
+      alertType: "Battery",
+      message: "Low Battery Level",
       status: "acknowledged",
-      timestamp: "2024-06-03 14:55:00",
-      source: "iot-042"
+      priority: "warning",
+      timestamp: "2024-06-03 14:55:00"
     },
     {
       id: 3,
-      title: "Signal Loss",
-      severity: "warning",
+      panelNo: "PNL-003",
+      device: "iot-014",
+      alertType: "Signal",
+      message: "Signal Loss Detected",
       status: "active",
-      timestamp: "2024-06-03 14:50:00",
-      source: "iot-014"
+      priority: "warning",
+      timestamp: "2024-06-03 14:50:00"
     },
     {
       id: 4,
-      title: "Firmware Update",
-      severity: "info",
+      panelNo: "PNL-004",
+      device: "iot-077",
+      alertType: "Firmware",
+      message: "Firmware Update Completed",
       status: "resolved",
-      timestamp: "2024-06-03 14:45:00",
-      source: "iot-077"
+      priority: "info",
+      timestamp: "2024-06-03 14:45:00"
     },
     {
       id: 5,
-      title: "Humidity Threshold",
-      severity: "critical",
+      panelNo: "PNL-005",
+      device: "iot-008",
+      alertType: "Humidity",
+      message: "Humidity Threshold Exceeded",
       status: "investigating",
-      timestamp: "2024-06-03 14:40:00",
-      source: "iot-008"
+      priority: "critical",
+      timestamp: "2024-06-03 14:40:00"
     },
     {
       id: 6,
-      title: "Device Restarted",
-      severity: "info",
+      panelNo: "PNL-006",
+      device: "iot-029",
+      alertType: "System",
+      message: "Device Restarted Unexpectedly",
       status: "resolved",
-      timestamp: "2024-06-03 14:35:00",
-      source: "iot-029"
+      priority: "info",
+      timestamp: "2024-06-03 14:35:00"
     }
   ];
 
-  const getSeverityBadge = (severity: string) => {
-    switch (severity) {
+  const getPriorityBadge = (priority: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | null | undefined> | null | undefined) => {
+    switch (priority) {
       case 'critical':
         return (
           <Badge variant="destructive" className="flex items-center gap-1">
@@ -83,11 +96,11 @@ export const AlertsTable = () => {
           </Badge>
         );
       default:
-        return <Badge variant="outline">{severity}</Badge>;
+        return <Badge variant="outline">{priority}</Badge>;
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | null | undefined> | null | undefined) => {
     switch (status) {
       case 'active':
         return <Badge className="bg-red-500 hover:bg-red-600">Active</Badge>;
@@ -107,44 +120,61 @@ export const AlertsTable = () => {
     }
   };
 
-  // Filter alerts based on search term
+  // Filter alerts based on search term across all relevant fields
   const filteredAlerts = alerts.filter((alert) =>
-    [alert.title, alert.source, alert.status].some((field) =>
+    [
+      alert.panelNo,
+      alert.device,
+      alert.alertType,
+      alert.message,
+      alert.status,
+      alert.priority
+    ].some((field) =>
       field.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  return (
-    <Card className="space-y-2 gap-0 p-3 rounded-lg">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">IoT Device Alerts</h3>
-        <Input
-          type="text"
-          placeholder="Search alerts..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-48 text-sm"
-        />
-      </div>
+  const SearchBar = () => (
+    <div className="relative w-64">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <Input
+        placeholder="Search alerts..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10"
+      />
+    </div>
+  );
 
-      <div className="border rounded-lg overflow-hidden">
+  return (
+    <Card className="gap-0 p-0 rounded-lg flex flex-col justify-between overflow-hidden">
+      <CardHeader className="flex items-center justify-between p-2">
+        <CardTitle>Alerts</CardTitle>
+        <SearchBar />
+      </CardHeader>
+      <Separator />
+      <CardContent className="p-2 w-full flex-1 overflow-auto">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr className="border-b">
+              <th className="text-left p-2 font-medium">Panel No</th>
               <th className="text-left p-2 font-medium">Device</th>
-              <th className="text-left p-2 font-medium">Alert</th>
-              <th className="text-left p-2 font-medium">Severity</th>
+              <th className="text-left p-2 font-medium">Alert Type</th>
+              <th className="text-left p-2 font-medium">Message</th>
               <th className="text-left p-2 font-medium">Status</th>
-              <th className="text-right p-2 font-medium">Time</th>
+              <th className="text-left p-2 font-medium">Priority</th>
+              <th className="text-right p-2 font-medium">Timestamp</th>
             </tr>
           </thead>
           <tbody>
             {filteredAlerts.slice(0, 5).map((alert) => (
               <tr key={alert.id} className="border-b hover:bg-muted/50 transition-colors">
-                <td className="p-2 font-mono text-xs">{alert.source}</td>
-                <td className="text-xs text-muted-foreground truncate p-2">{alert.title}</td>
-                <td className="p-2">{getSeverityBadge(alert.severity)}</td>
+                <td className="p-2 font-mono text-xs">{alert.panelNo}</td>
+                <td className="p-2 font-mono text-xs">{alert.device}</td>
+                <td className="p-2 text-xs">{alert.alertType}</td>
+                <td className="p-2 text-xs text-muted-foreground truncate">{alert.message}</td>
                 <td className="p-2">{getStatusBadge(alert.status)}</td>
+                <td className="p-2">{getPriorityBadge(alert.priority)}</td>
                 <td className="p-2 text-right font-mono text-xs">
                   {alert.timestamp.split(' ')[1]}
                 </td>
@@ -152,11 +182,11 @@ export const AlertsTable = () => {
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="text-xs text-muted-foreground text-center">
+      </CardContent>
+      <Separator />
+      <CardFooter className="text-xs text-muted-foreground text-center p-2">
         Showing {filteredAlerts.length > 5 ? 'latest 5' : filteredAlerts.length} of {filteredAlerts.length} IoT alerts
-      </div>
+      </CardFooter>
     </Card>
   );
 };

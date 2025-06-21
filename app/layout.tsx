@@ -20,7 +20,7 @@ const jetbrains_mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EL-EXE- Media Analytics and Monitoring",
+  title: "EL-EXE- IoT Devices Analytics and Monitoring",
   description: "",
 };
 

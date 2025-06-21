@@ -1,95 +1,85 @@
 'use client'
 import React, { useState } from 'react';
+import { Wrench, CheckCircle, Clock, XCircle, Search } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, AlertCircle, Info, CheckCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Separator } from '../ui/separator';
 
 export const MaintenanceTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const maintenanceTasks = [
+  const maintenanceRecords = [
     {
       id: 1,
-      deviceId: "iot-001",
-      task: "Firmware Update",
-      severity: "critical",
-      status: "pending",
-      lastChecked: "2024-06-03 12:00:00",
-      nextDue: "2024-06-05 12:00:00"
+      panelNo: "PNL-001",
+      device: "iot-001",
+      type: "Calibration",
+      status: "completed",
+      scheduled: "2024-06-03 09:00:00",
+      completed: "2024-06-03 11:30:00",
+      technician: "John Doe",
+      notes: "Adjusted sensor alignment"
     },
     {
       id: 2,
-      deviceId: "iot-002",
-      task: "Battery Check",
-      severity: "warning",
-      status: "in_progress",
-      lastChecked: "2024-06-02 10:30:00",
-      nextDue: "2024-06-04 10:30:00"
+      panelNo: "PNL-002",
+      device: "iot-042",
+      type: "Battery Replacement",
+      status: "scheduled",
+      scheduled: "2024-06-04 14:00:00",
+      completed: null,
+      technician: "Jane Smith",
+      notes: "Replace with high-capacity battery"
     },
     {
       id: 3,
-      deviceId: "iot-003",
-      task: "Sensor Calibration",
-      severity: "info",
-      status: "completed",
-      lastChecked: "2024-06-01 08:00:00",
-      nextDue: "2024-06-30 08:00:00"
+      panelNo: "PNL-003",
+      device: "iot-014",
+      type: "Firmware Update",
+      status: "in-progress",
+      scheduled: "2024-06-03 13:00:00",
+      completed: null,
+      technician: "Mike Johnson",
+      notes: "Updating to v2.3.1"
     },
     {
       id: 4,
-      deviceId: "iot-004",
-      task: "Connectivity Test",
-      severity: "warning",
-      status: "pending",
-      lastChecked: "2024-06-03 11:00:00",
-      nextDue: "2024-06-06 11:00:00"
+      panelNo: "PNL-004",
+      device: "iot-077",
+      type: "Inspection",
+      status: "completed",
+      scheduled: "2024-06-02 10:00:00",
+      completed: "2024-06-02 12:00:00",
+      technician: "Sarah Brown",
+      notes: "All components functional"
     },
     {
       id: 5,
-      deviceId: "iot-005",
-      task: "Security Patch",
-      severity: "critical",
-      status: "in_progress",
-      lastChecked: "2024-06-03 09:15:00",
-      nextDue: "2024-06-04 09:15:00"
+      panelNo: "PNL-005",
+      device: "iot-008",
+      type: "Repair",
+      status: "cancelled",
+      scheduled: "2024-06-01 15:00:00",
+      completed: null,
+      technician: "Tom Wilson",
+      notes: "Cancelled due to device replacement"
+    },
+    {
+      id: 6,
+      panelNo: "PNL-006",
+      device: "iot-029",
+      type: "Cleaning",
+      status: "scheduled",
+      scheduled: "2024-06-05 08:00:00",
+      completed: null,
+      technician: "Lisa Davis",
+      notes: "Clean sensor lenses"
     }
   ];
 
-  const getSeverityBadge = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return (
-          <Badge variant="destructive" className="flex items-center gap-1">
-            <AlertTriangle className="w-3 h-3" />
-            Critical
-          </Badge>
-        );
-      case 'warning':
-        return (
-          <Badge variant="secondary" className="flex items-center gap-1 bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
-            <AlertCircle className="w-3 h-3" />
-            Warning
-          </Badge>
-        );
-      case 'info':
-        return (
-          <Badge variant="outline" className="flex items-center gap-1 text-blue-600 border-blue-200">
-            <Info className="w-3 h-3" />
-            Info
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{severity}</Badge>;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | null | undefined> | null | undefined) => {
     switch (status) {
-      case 'pending':
-        return <Badge className="bg-red-500 hover:bg-red-600">Pending</Badge>;
-      case 'in_progress':
-        return <Badge className="bg-orange-500 hover:bg-orange-600">In Progress</Badge>;
       case 'completed':
         return (
           <Badge className="bg-green-500 hover:bg-green-600 flex items-center gap-1">
@@ -97,61 +87,99 @@ export const MaintenanceTable = () => {
             Completed
           </Badge>
         );
+      case 'scheduled':
+        return (
+          <Badge className="bg-blue-500 hover:bg-blue-600 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            Scheduled
+          </Badge>
+        );
+      case 'in-progress':
+        return (
+          <Badge className="bg-yellow-500 hover:bg-yellow-600 flex items-center gap-1">
+            <Wrench className="w-3 h-3" />
+            In Progress
+          </Badge>
+        );
+      case 'cancelled':
+        return (
+          <Badge className="bg-red-500 hover:bg-red-600 flex items-center gap-1">
+            <XCircle className="w-3 h-3" />
+            Cancelled
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  // Filter tasks based on search term
-  const filteredTasks = maintenanceTasks.filter((task) =>
-    [task.deviceId, task.task, task.status].some((field) =>
+  // Filter maintenance records based on search term across all relevant fields
+  const filteredRecords = maintenanceRecords.filter((record) =>
+    [
+      record.panelNo,
+      record.device,
+      record.type,
+      record.status,
+      record.technician,
+      record.notes
+    ].some((field) =>
       field.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  return (
-    <Card className="space-y-2 gap-0 p-3 rounded-lg">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Device Maintenance</h3>
-        <Input
-          type="text"
-          placeholder="Search tasks..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-48 text-sm"
-        />
-      </div>
+  const SearchBar = () => (
+    <div className="relative w-64">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <Input
+        placeholder="Search maintenance records..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10"
+      />
+    </div>
+  );
 
-      <div className="border rounded-lg overflow-hidden">
+  return (
+    <Card className="gap-0 p-0 rounded-lg flex flex-col justify-between overflow-hidden">
+      <CardHeader className="flex items-center justify-between p-2">
+        <CardTitle>Maintenance Records</CardTitle>
+        <SearchBar />
+      </CardHeader>
+      <Separator />
+      <CardContent className="p-2 w-full flex-1 overflow-auto">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr className="border-b">
+              <th className="text-left p-2 font-medium">Panel No</th>
               <th className="text-left p-2 font-medium">Device</th>
-              <th className="text-left p-2 font-medium">Task</th>
-              <th className="text-left p-2 font-medium">Severity</th>
+              <th className="text-left p-2 font-medium">Type</th>
               <th className="text-left p-2 font-medium">Status</th>
-              <th className="text-right p-2 font-medium">Last Checked</th>
-              {/* <th className="text-right p-2 font-medium">Next Due</th> */}
+              <th className="text-left p-2 font-medium">Scheduled</th>
+              <th className="text-left p-2 font-medium">Completed</th>
+              <th className="text-left p-2 font-medium">Technician</th>
+              <th className="text-left p-2 font-medium">Notes</th>
             </tr>
           </thead>
           <tbody>
-            {filteredTasks.map((task) => (
-              <tr key={task.id} className="border-b hover:bg-muted/50 transition-colors">
-                <td className="p-2 font-mono text-xs">{task.deviceId}</td>
-                <td className="text-xs text-muted-foreground truncate p-2">{task.task}</td>
-                <td className="p-2">{getSeverityBadge(task.severity)}</td>
-                <td className="p-2">{getStatusBadge(task.status)}</td>
-                <td className="p-2 text-right text-xs font-mono">{task.lastChecked.split(' ')[1]}</td>
-                {/* <td className="p-2 text-right text-xs font-mono">{task.nextDue.split(' ')[1]}</td> */}
+            {filteredRecords.slice(0, 5).map((record) => (
+              <tr key={record.id} className="border-b hover:bg-muted/50 transition-colors">
+                <td className="p-2 font-mono text-xs">{record.panelNo}</td>
+                <td className="p-2 font-mono text-xs">{record.device}</td>
+                <td className="p-2 text-xs">{record.type}</td>
+                <td className="p-2">{getStatusBadge(record.status)}</td>
+                <td className="p-2 font-mono text-xs">{record.scheduled.split(' ')[1]}</td>
+                <td className="p-2 font-mono text-xs">{record.completed ? record.completed.split(' ')[1] : '-'}</td>
+                <td className="p-2 text-xs">{record.technician}</td>
+                <td className="p-2 text-xs text-muted-foreground truncate">{record.notes}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="text-xs text-muted-foreground text-center">
-        Showing {filteredTasks.length} maintenance tasks
-      </div>
+      </CardContent>
+      <Separator />
+      <CardFooter className="text-xs text-muted-foreground text-center p-2">
+        Showing {filteredRecords.length > 5 ? 'latest 5' : filteredRecords.length} of {filteredRecords.length} maintenance records
+      </CardFooter>
     </Card>
   );
 };

@@ -19,7 +19,6 @@ import { format } from "date-fns";
 import InfoWidget from "@/components/cards/info-widget";
 import SectionHeader from "@/components/layouts/section-header";
 import { StatsGrid } from "@/components/layouts/stats-grid";
-
 interface DateTimePickerProps {
   date?: Date;
   onDateChange: (date?: Date) => void;
@@ -383,7 +382,7 @@ const DeviceDetails: React.FC = () => {
         </TabsList>
 
         <TabsContent value="live-updates" className="p-2">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <InfoWidget
               name="Temperature"
               value="23.5"
@@ -446,6 +445,7 @@ const DeviceDetails: React.FC = () => {
 
         <TabsContent value="event-history" className="p-2">
           <EventHistory />
+          {/* <MotorCard/> */}
         </TabsContent>
 
         <TabsContent value="alert-history" className="p-2">

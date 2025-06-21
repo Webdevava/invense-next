@@ -1,20 +1,11 @@
 import React from "react";
+import { Gauge, Type, Power, PowerOff } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Gauge,
-  Type,
-  Power,
-  PowerOff,
-} from "lucide-react";
-import { Separator } from "../ui/separator";
-
-
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BaseProps {
   name: string;
@@ -47,180 +38,131 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
   const formatTimestamp = (timestamp: string): string => {
     try {
       const date = new Date(timestamp);
-      return date.toLocaleString();
+      const now = new Date();
+      const diffInMinutes = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60)
+      );
+
+      if (diffInMinutes < 1) return "just now";
+      if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) return `${diffInHours} hr ago`;
+
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
     } catch {
-      return timestamp || "N/A";
+      return "N/A";
     }
   };
 
   const getTypeIcon = () => {
+    const iconClass = "h-7 w-7 text-white";
     switch (props.type) {
       case "gauge":
-        return <Gauge className="h-4 w-4" />;
+        return <Gauge className={iconClass} />;
       case "on/off":
-        return props.isActive ? <Power className="h-4 w-4" /> : <PowerOff className="h-4 w-4" />;
+        return props.isActive ? (
+          <Power className={iconClass} />
+        ) : (
+          <PowerOff className={iconClass} />
+        );
       default:
-        return <Type className="h-4 w-4" />;
+        return <Type className={iconClass} />;
     }
   };
 
-  const getColorClasses = () => {
+  const getIconBackground = () => {
     switch (props.type) {
       case "gauge":
-        const percentage = ((props.value - props.min) / (props.max - props.min)) * 100;
-        if (percentage >= 80) {
-          return {
-            accent: "text-red-600",
-            gaugeColor: "#dc2626",
-            bgAccent: "bg-red-50 dark:bg-red-950/20",
-          };
-        } else if (percentage >= 60) {
-          return {
-            accent: "text-amber-600",
-            gaugeColor: "#d97706",
-            bgAccent: "bg-amber-50 dark:bg-amber-950/20",
-          };
-        } else {
-          return {
-            accent: "text-green-600",
-            gaugeColor: "#16a34a",
-            bgAccent: "bg-green-50 dark:bg-green-950/20",
-          };
-        }
+        const percentage =
+          ((props.value - props.min) / (props.max - props.min)) * 100;
+        if (percentage >= 80) return "from-red-400 to-red-600";
+        if (percentage >= 60) return "from-amber-400 to-amber-600";
+        return "from-green-400 to-green-600";
       case "on/off":
-        return props.isActive ? {
-          accent: "text-green-600",
-          bgAccent: "bg-green-50 dark:bg-green-950/20",
-        } : {
-          accent: "text-muted-foreground",
-          bgAccent: "bg-gray-50 dark:bg-gray-950/20",
-        };
+        return props.isActive
+          ? "from-green-400 to-green-600"
+          : "from-gray-400 to-gray-600";
       default:
-        return {
-          accent: "text-blue-600",
-          bgAccent: "bg-blue-50 dark:bg-blue-950/20",
-        };
+        return "from-blue-400 to-blue-600";
     }
   };
 
-  const colors = getColorClasses();
-
-  // Circular gauge SVG component
-  const CircularGauge = ({ value, min, max, size = 120 }: { value: number; min: number; max: number; size?: number }) => {
-    const percentage = Math.min(Math.max(((value - min) / (max - min)) * 100, 0), 100);
-    const strokeWidth = 8;
-    const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-    
-    return (
-      <div className="relative inline-flex items-center justify-center">
-        <svg width={size} height={size} className="transform -rotate-90">
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            fill="none"
-            className="text-muted"
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke={colors.gaugeColor}
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeDasharray={strokeDasharray}
-            strokeLinecap="round"
-            className="transition-all duration-700 ease-out"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`text-2xl font-bold ${colors.accent}`}>
-            {value}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {percentage.toFixed(0)}%
-          </span>
-        </div>
-      </div>
-    );
-  };
-
-  const renderContent = () => {
+  const getValueColor = () => {
     switch (props.type) {
       case "gauge":
-        return (
-          <div className="flex flex-col items-center space-y-3">
-            <CircularGauge value={props.value} min={props.min} max={props.max} />
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground">
-                Range: {props.min} - {props.max} {props.unit}
-              </div>
-            </div>
-          </div>
-        );
-      
+        const percentage =
+          ((props.value - props.min) / (props.max - props.min)) * 100;
+        if (percentage >= 80) return "text-red-600";
+        if (percentage >= 60) return "text-amber-600";
+        return "text-green-600";
       case "on/off":
-        return (
-          <div className="flex flex-col items-center space-y-3">
-            <div className={`p-3 rounded-full ${props.isActive ? 'bg-green-100 dark:bg-green-900/30' : 'bg-muted'} transition-colors duration-300`}>
-              {props.isActive ? (
-                <Power className={`h-6 w-6 ${colors.accent}`} />
-              ) : (
-                <PowerOff className={`h-6 w-6 ${colors.accent}`} />
-              )}
-            </div>
-            <div className={`text-lg font-semibold ${colors.accent}`}>
-              {props.isActive ? "ON" : "OFF"}
-            </div>
-          </div>
-        );
-      
+        return props.isActive ? "text-green-600" : "text-muted-foreground";
       default:
-        return (
-          <div className="text-center">
-            <div className={`text-2xl font-bold ${colors.accent}`}>
-              {props.value}
-              {props.unit && <span className="text-sm font-normal ml-1 text-muted-foreground">{props.unit}</span>}
-            </div>
-          </div>
-        );
+        return "text-blue-600";
+    }
+  };
+
+  const getDisplayValue = () => {
+    switch (props.type) {
+      case "gauge":
+        return `${props.value}${props.unit ? ` ${props.unit}` : ""}`;
+      case "on/off":
+        return props.isActive ? "ON" : "OFF";
+      default:
+        return `${props.value}${props.unit ? ` ${props.unit}` : ""}`;
     }
   };
 
   return (
-    <Card className={`w-full min-h-64 rounded-lg transition-all duration-200 hover:shadow-md border ${colors.bgAccent} p-0 gap-0`}>
-      <CardHeader className="p-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold">
-            {props.name}
-          </CardTitle>
-          <div className={`p-1.5 rounded-md bg-popover shadow-sm ${colors.accent}`}>
-            {getTypeIcon()}
-          </div>
-        </div>
-      </CardHeader>
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="w-full max-w-72 h-16 bg-card hover:bg-muted shadow-sm outline outline-offset-1 outline-border rounded-lg flex items-center justify-start p-2 border">
+            {/* Icon container */}
+            <div
+              className={`w-12 h-12 aspect-square rounded-lg bg-gradient-to-br ${getIconBackground()} flex items-center justify-center`}
+            >
+              {getTypeIcon()}
+            </div>
 
-      <CardContent className="py-4 h-full flex items-center justify-center">
-        {renderContent()}
-      </CardContent>
-      
-      <Separator />
-      
-      <CardFooter className="p-2">
-        <div className="text-xs text-muted-foreground flex items-center justify-between w-full">
-          <span>Updated</span>
-          <span className="font-mono">
-            {formatTimestamp(props.timestamp)}
-          </span>
-        </div>
-      </CardFooter>
-    </Card>
+            {/* Text content */}
+            <div className="flex-1 ml-2 font-sans">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold truncate">{props.name}</h3>
+              </div>
+              <p
+                className={`text-lg font-semibold truncate ${getValueColor()}`}
+              >
+                {getDisplayValue()}
+              </p>
+            </div>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="py-3 w-52  ">
+          <ul className="grid gap-3 text-xs">
+            <li className="grid gap-0.5">
+              <span className="text-muted-foreground">Last Activity</span>
+              <span className="font-medium">{formatTimestamp(props.timestamp)}</span>
+            </li>
+            <li className="grid gap-0.5">
+              <span className="text-muted-foreground">Panel Type</span>
+              <span className="font-medium">{props.type}</span>
+            </li>
+            <li className="grid gap-0.5">
+              <span className="text-muted-foreground">Name</span>
+              <span className="font-medium">{props.name}</span>
+            </li>
+            <li className="grid gap-0.5">
+              <span className="text-muted-foreground">Panel ID</span>
+              <span className="font-medium">{props.key || "E5002"}</span>
+            </li>
+          </ul>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
-
 
 export default InfoWidget;

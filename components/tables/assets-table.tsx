@@ -1,139 +1,164 @@
-"use client";
-
+'use client'
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Separator } from '../ui/separator';
 
-export const AssetsTable = () => {
+export const PanelAssetsTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedPanel, setExpandedPanel] = useState<number | null>(null);
 
-  const assets = [
+  const panels = [
     {
       id: 1,
-      asset: "Incomer PCC1",
-      dailyKwh: 0.00,
-      avgKw: 5.57,
-      avgAmp: 23.69,
-      avgPf: 1
+      panel: "PNL-001",
+      noOfAssets: 5,
+      dailyKwh: 120.5,
+      liveKw: 15.2,
+      liveAmp: 65.3,
+      livePf: 0.92,
+      assets: [
+        { id: 1, name: "AST-001", dailyKwh: 24.1, avgKw: 3.0, avgAmp: 13.0, avgPf: 0.91 },
+        { id: 2, name: "AST-002", dailyKwh: 22.8, avgKw: 2.8, avgAmp: 12.5, avgPf: 0.90 },
+        { id: 3, name: "AST-003", dailyKwh: 25.3, avgKw: 3.2, avgAmp: 13.8, avgPf: 0.93 },
+        { id: 4, name: "AST-004", dailyKwh: 23.9, avgKw: 3.1, avgAmp: 13.2, avgPf: 0.92 },
+        { id: 5, name: "AST-005", dailyKwh: 24.4, avgKw: 3.1, avgAmp: 12.8, avgPf: 0.91 }
+      ]
     },
     {
       id: 2,
-      asset: "LATHE 3",
-      dailyKwh: 0.00,
-      avgKw: 0.00,
-      avgAmp: 0,
-      avgPf: -0.62
+      panel: "PNL-002",
+      noOfAssets: 4,
+      dailyKwh: 98.7,
+      liveKw: 12.4,
+      liveAmp: 52.1,
+      livePf: 0.89,
+      assets: [
+        { id: 6, name: "AST-006", dailyKwh: 24.5, avgKw: 3.0, avgAmp: 13.0, avgPf: 0.88 },
+        { id: 7, name: "AST-007", dailyKwh: 23.8, avgKw: 2.9, avgAmp: 12.7, avgPf: 0.89 },
+        { id: 8, name: "AST-008", dailyKwh: 25.1, avgKw: 3.1, avgAmp: 13.5, avgPf: 0.90 },
+        { id: 9, name: "AST-009", dailyKwh: 25.3, avgKw: 3.4, avgAmp: 12.9, avgPf: 0.89 }
+      ]
     },
     {
       id: 3,
-      asset: "POWER SOCKET 1",
-      dailyKwh: 0.00,
-      avgKw: 1.32,
-      avgAmp: 5.79,
-      avgPf: 0.95
-    },
-    {
-      id: 4,
-      asset: "BALANCING",
-      dailyKwh: NaN,
-      avgKw: NaN,
-      avgAmp: NaN,
-      avgPf: NaN
-    },
-    {
-      id: 5,
-      asset: "EOT CRANE 1",
-      dailyKwh: 0.00,
-      avgKw: 0.00,
-      avgAmp: 0,
-      avgPf: 0
-    },
-    {
-      id: 6,
-      asset: "PAINT BOOTH SMALL",
-      dailyKwh: 0.00,
-      avgKw: 0.00,
-      avgAmp: 0,
-      avgPf: 0
-    },
-    {
-      id: 7,
-      asset: "APFC - PCC1",
-      dailyKwh: 0.00,
-      avgKw: 0.04,
-      avgAmp: 0.25,
-      avgPf: 0.81
-    },
-    {
-      id: 8,
-      asset: "WET BLASTING",
-      dailyKwh: 0.00,
-      avgKw: 0.00,
-      avgAmp: 0,
-      avgPf: 0
-    },
-    {
-      id: 9,
-      asset: "WET BLASTING 2",
-      dailyKwh: 0.00,
-      avgKw: 0.00,
-      avgAmp: 0,
-      avgPf: 0
+      panel: "PNL-003",
+      noOfAssets: 6,
+      dailyKwh: 145.2,
+      liveKw: 18.7,
+      liveAmp: 78.4,
+      livePf: 0.94,
+      assets: [
+        { id: 10, name: "AST-010", dailyKwh: 24.0, avgKw: 3.0, avgAmp: 13.1, avgPf: 0.93 },
+        { id: 11, name: "AST-011", dailyKwh: 23.7, avgKw: 2.9, avgAmp: 12.6, avgPf: 0.94 },
+        { id: 12, name: "AST-012", dailyKwh: 24.5, avgKw: 3.1, avgAmp: 13.3, avgPf: 0.94 },
+        { id: 13, name: "AST-013", dailyKwh: 24.8, avgKw: 3.2, avgAmp: 13.5, avgPf: 0.93 },
+        { id: 14, name: "AST-014", dailyKwh: 24.2, avgKw: 3.0, avgAmp: 13.0, avgPf: 0.94 },
+        { id: 15, name: "AST-015", dailyKwh: 24.0, avgKw: 3.5, avgAmp: 12.9, avgPf: 0.93 }
+      ]
     }
   ];
 
-  // Filter assets based on search term
-  const filteredAssets = assets.filter((asset) =>
-    asset.asset.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter panels based on search term
+  const filteredPanels = panels.filter((panel) =>
+    panel.panel.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Helper to format values, handling NaN
-  const formatValue = (value: number | null) => {
-    if (value === null || isNaN(value)) return '-';
-    return value.toFixed(2);
+  const SearchBar = () => (
+    <div className="relative w-64">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      <Input
+        placeholder="Search panels..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10"
+      />
+    </div>
+  );
+
+  const togglePanel = (panelId: number) => {
+    setExpandedPanel(expandedPanel === panelId ? null : panelId);
   };
 
   return (
-    <Card className="space-y-2 gap-0 p-3 rounded-lg">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Asset Overview</h3>
-        <Input
-          type="text"
-          placeholder="Search assets..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-48 text-sm"
-        />
-      </div>
-
-      <div className="border rounded-lg overflow-hidden">
+    <Card className="gap-0 p-0 rounded-lg flex flex-col justify-between">
+      <CardHeader className="flex items-center justify-between p-2">
+        <CardTitle>Panel Overview</CardTitle>
+        <SearchBar />
+      </CardHeader>
+      <Separator />
+      <CardContent className="p-2 w-full flex-1">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr className="border-b">
-              <th className="text-left p-2 font-medium">Asset</th>
-              <th className="text-right p-2 font-medium">Daily Kwh</th>
-              <th className="text-right p-2 font-medium">Avg kW</th>
-              <th className="text-right p-2 font-medium">Avg Amp</th>
-              <th className="text-right p-2 font-medium">Avg PF</th>
+              <th className="text-left p-2 font-medium"></th>
+              <th className="text-left p-2 font-medium">Panel</th>
+              <th className="text-left p-2 font-medium">No of Assets</th>
+              <th className="text-left p-2 font-medium">Daily Kwh</th>
+              <th className="text-left p-2 font-medium">Live kW</th>
+              <th className="text-left p-2 font-medium">Live Amp</th>
+              <th className="text-left p-2 font-medium">Live PF</th>
             </tr>
           </thead>
           <tbody>
-            {filteredAssets.map((asset) => (
-              <tr key={asset.id} className="border-b hover:bg-muted/50 transition-colors">
-                <td className="p-2 text-xs font-mono">{asset.asset}</td>
-                <td className="p-2 text-right text-xs font-mono">{formatValue(asset.dailyKwh)}</td>
-                <td className="p-2 text-right text-xs font-mono">{formatValue(asset.avgKw)}</td>
-                <td className="p-2 text-right text-xs font-mono">{formatValue(asset.avgAmp)}</td>
-                <td className="p-2 text-right text-xs font-mono">{formatValue(asset.avgPf)}</td>
-              </tr>
+            {filteredPanels.slice(0, 5).map((panel) => (
+              <React.Fragment key={panel.id}>
+                <tr
+                  className="border-b hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => togglePanel(panel.id)}
+                >
+                  <td className="p-2">
+                    {expandedPanel === panel.id ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </td>
+                  <td className="p-2 font-mono text-xs">{panel.panel}</td>
+                  <td className="p-2 text-xs">{panel.noOfAssets}</td>
+                  <td className="p-2 text-xs">{panel.dailyKwh.toFixed(1)}</td>
+                  <td className="p-2 text-xs">{panel.liveKw.toFixed(1)}</td>
+                  <td className="p-2 text-xs">{panel.liveAmp.toFixed(1)}</td>
+                  <td className="p-2 text-xs">{panel.livePf.toFixed(2)}</td>
+                </tr>
+                {expandedPanel === panel.id && (
+                  <tr>
+                    <td colSpan={7} className="p-4 bg-muted/20">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/50">
+                          <tr className="border-b">
+                            <th className="text-left p-2 font-medium">Asset</th>
+                            <th className="text-left p-2 font-medium">Daily Kwh</th>
+                            <th className="text-left p-2 font-medium">Avg Kw</th>
+                            <th className="text-left p-2 font-medium">Avg Amp</th>
+                            <th className="text-left p-2 font-medium">Avg PF</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {panel.assets.map((asset) => (
+                            <tr key={asset.id} className="border-b hover:bg-muted/50 transition-colors">
+                              <td className="p-2 font-mono text-xs">{asset.name}</td>
+                              <td className="p-2 text-xs">{asset.dailyKwh.toFixed(1)}</td>
+                              <td className="p-2 text-xs">{asset.avgKw.toFixed(1)}</td>
+                              <td className="p-2 text-xs">{asset.avgAmp.toFixed(1)}</td>
+                              <td className="p-2 text-xs">{asset.avgPf.toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>
-      </div>
-
-      <div className="text-xs text-muted-foreground text-center">
-        Showing {filteredAssets.length} asset{filteredAssets.length !== 1 ? 's' : ''}
-      </div>
+      </CardContent>
+      <Separator />
+      <CardFooter className="text-xs text-muted-foreground text-center p-2">
+        Showing {filteredPanels.length > 5 ? 'latest 5' : filteredPanels.length} of {filteredPanels.length} panels
+      </CardFooter>
     </Card>
   );
 };
