@@ -11,6 +11,7 @@ interface BaseProps {
   name: string;
   key: string;
   timestamp: string;
+  isBig?: boolean;
 }
 
 interface TextProps extends BaseProps {
@@ -35,6 +36,8 @@ interface OnOffProps extends BaseProps {
 type InfoWidgetProps = TextProps | GaugeProps | OnOffProps;
 
 const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
+  const isBig = props.isBig ?? false;
+
   const formatTimestamp = (timestamp: string): string => {
     try {
       const date = new Date(timestamp);
@@ -56,8 +59,13 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
     }
   };
 
-  const getTypeIcon = () => {
-    const iconClass = "h-7 w-7 text-white";
+  const getTypeIcon = (size: "small" | "large" | "watermark") => {
+    const iconClass =
+      size === "small"
+        ? "h-7 w-7 text-white"
+        : size === "large"
+        ? "h-12 w-12 text-white"
+        : "h-24 w-24 text-muted-foreground/10";
     switch (props.type) {
       case "gauge":
         return <Gauge className={iconClass} />;
@@ -77,15 +85,15 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
       case "gauge":
         const percentage =
           ((props.value - props.min) / (props.max - props.min)) * 100;
-        if (percentage >= 80) return "from-red-400 to-red-600";
-        if (percentage >= 60) return "from-amber-400 to-amber-600";
-        return "from-green-400 to-green-600";
+        if (percentage >= 80) return "from-red-500 to-red-700"; // Alert
+        if (percentage >= 60) return "from-yellow-500 to-yellow-700"; // Warn
+        return "from-green-500 to-green-700"; // Normal
       case "on/off":
         return props.isActive
-          ? "from-green-400 to-green-600"
-          : "from-gray-400 to-gray-600";
+          ? "from-green-500 to-green-700" // Normal
+          : "from-red-500 to-red-700"; // Alert
       default:
-        return "from-blue-400 to-blue-600";
+        return "from-green-500 to-green-700"; // Normal for text
     }
   };
 
@@ -94,13 +102,13 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
       case "gauge":
         const percentage =
           ((props.value - props.min) / (props.max - props.min)) * 100;
-        if (percentage >= 80) return "text-red-600";
-        if (percentage >= 60) return "text-amber-600";
-        return "text-green-600";
+        if (percentage >= 80) return "text-red-600"; // Alert
+        if (percentage >= 60) return "text-yellow-600"; // Warn
+        return "text-green-600"; // Normal
       case "on/off":
-        return props.isActive ? "text-green-600" : "text-muted-foreground";
+        return props.isActive ? "text-green-600" : "text-red-600"; // Normal or Alert
       default:
-        return "text-blue-600";
+        return "text-green-600"; // Normal for text
     }
   };
 
@@ -115,7 +123,60 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
     }
   };
 
-  return (
+  const renderHalfGauge = () => {
+    if (props.type !== "gauge") return null;
+    const percentage = ((props.value - props.min) / (props.max - props.min)) * 100;
+    return (
+      <div className="relative w-48 h-24">
+        <svg className="w-full h-full" viewBox="0 0 100 50">
+          <path
+            d="M 10 50 A 40 40 0 0 1 90 50"
+            fill="none"
+            stroke="rgba(0,0,0,0.1)"
+            strokeWidth="8"
+          />
+          <path
+            d="M 10 50 A 40 40 0 0 1 90 50"
+            fill="none"
+            stroke={percentage >= 80 ? "#DC2626" : percentage >= 60 ? "#D97706" : "#16A34A"}
+            strokeWidth="8"
+            strokeDasharray={`${(percentage * 251.2) / 100}, 251.2`}
+            strokeLinecap="round"
+          />
+        </svg>
+        <p className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 text-xl font-semibold ${getValueColor()}`}>
+          {getDisplayValue()}
+        </p>
+      </div>
+    );
+  };
+
+  const renderBigCard = () => (
+    <div className="w-full max-w-md h-48 bg-card hover:bg-muted shadow-lg outline outline-offset-2 outline-border rounded-xl flex flex-col items-start justify-between p-6 border relative overflow-hidden">
+      {/* Watermark Icon */}
+      <div className="absolute -bottom-8 -right-8">
+        {props.type === "gauge" ? renderHalfGauge() : getTypeIcon("watermark")}
+      </div>
+
+      {/* Header */}
+      <div>
+        <h3 className="text-xl font-bold">{props.name}</h3>
+        <p className="text-sm text-muted-foreground">{formatTimestamp(props.timestamp)}</p>
+      </div>
+
+      {/* Content */}
+      <p className={`text-4xl font-bold ${getValueColor()}`}>
+        {getDisplayValue()}
+      </p>
+
+      {/* Footer */}
+      <div className="text-xs text-muted-foreground">
+        Panel ID: {props.key || "E5002"}
+      </div>
+    </div>
+  );
+
+  const renderSmallCard = () => (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -124,7 +185,7 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
             <div
               className={`w-12 h-12 aspect-square rounded-lg bg-gradient-to-br ${getIconBackground()} flex items-center justify-center`}
             >
-              {getTypeIcon()}
+              {getTypeIcon("small")}
             </div>
 
             {/* Text content */}
@@ -140,7 +201,7 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
             </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent className="py-3 w-52  ">
+        <TooltipContent className="py-3 w-52">
           <ul className="grid gap-3 text-xs">
             <li className="grid gap-0.5">
               <span className="text-muted-foreground">Last Activity</span>
@@ -163,6 +224,8 @@ const InfoWidget: React.FC<InfoWidgetProps> = (props) => {
       </Tooltip>
     </TooltipProvider>
   );
+
+  return isBig ? renderBigCard() : renderSmallCard();
 };
 
 export default InfoWidget;

@@ -1,5 +1,5 @@
-import {AlertsTable} from "@/components/tables/alerts-table";
-import {MaintenanceTable} from "@/components/tables/maintenance-table";
+import { AlertsTable } from "@/components/tables/alerts-table";
+import { MaintenanceTable } from "@/components/tables/maintenance-table";
 import { StatsGrid } from "@/components/layouts/stats-grid";
 import { AlertCircle, AlertTriangle, MapPin, Package } from "lucide-react";
 import DeviceInfoWrapper from "@/components/dashboard/DeviceInfoWrapper"; // Import the wrapper
@@ -42,12 +42,13 @@ const Home = () => {
       />
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full flex-1">
-
-      <DeviceInfoWrapper />
+          <DeviceInfoWrapper />
         </div>
-        <AlertsTable />
+        <div className="w-full flex-1">
+          <AlertsTable />
+        </div>
       </div>
-        <MaintenanceTable />
+      <MaintenanceTable />
     </div>
   );
 };

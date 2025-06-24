@@ -147,7 +147,7 @@ export const AlertsTable = () => {
   );
 
   return (
-    <Card className="gap-0 p-0 rounded-lg flex flex-col justify-between overflow-hidden">
+    <Card className="gap-0 p-0 rounded-lg max-w-xl flex flex-col justify-between overflow-hidden">
       <CardHeader className="flex items-center justify-between p-2">
         <CardTitle>Alerts</CardTitle>
         <SearchBar />

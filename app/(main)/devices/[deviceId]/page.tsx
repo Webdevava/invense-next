@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Popover,
@@ -19,6 +21,7 @@ import { format } from "date-fns";
 import InfoWidget from "@/components/cards/info-widget";
 import SectionHeader from "@/components/layouts/section-header";
 import { StatsGrid } from "@/components/layouts/stats-grid";
+
 interface DateTimePickerProps {
   date?: Date;
   onDateChange: (date?: Date) => void;
@@ -321,6 +324,7 @@ const AlertHistory: React.FC = () => {
 
 const DeviceDetails: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("live-updates");
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   // Handle URL parameters
   useEffect(() => {
@@ -382,7 +386,23 @@ const DeviceDetails: React.FC = () => {
         </TabsList>
 
         <TabsContent value="live-updates" className="p-2">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="flex items-center justify-end mb-4">
+            <Label htmlFor="expanded-mode" className="mr-2">
+              Expanded Mode
+            </Label>
+            <Switch
+              id="expanded-mode"
+              checked={isExpanded}
+              onCheckedChange={setIsExpanded}
+            />
+          </div>
+          <div
+            className={
+              isExpanded
+                ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4"
+                : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+            }
+          >
             <InfoWidget
               name="Temperature"
               value="23.5"
@@ -390,8 +410,8 @@ const DeviceDetails: React.FC = () => {
               key="T001"
               type="text"
               timestamp="2025-06-16T10:47:20Z"
+              isBig={isExpanded}
             />
-
             <InfoWidget
               name="CPU Usage"
               value={35}
@@ -401,8 +421,8 @@ const DeviceDetails: React.FC = () => {
               min={0}
               max={100}
               timestamp="2025-06-16T10:47:20Z"
+              isBig={isExpanded}
             />
-
             <InfoWidget
               name="Memory"
               value={68}
@@ -412,8 +432,8 @@ const DeviceDetails: React.FC = () => {
               min={0}
               max={100}
               timestamp="2025-06-16T10:47:20Z"
+              isBig={isExpanded}
             />
-
             <InfoWidget
               name="Storage"
               value={89}
@@ -423,29 +443,29 @@ const DeviceDetails: React.FC = () => {
               min={0}
               max={100}
               timestamp="2025-06-16T10:47:20Z"
+              isBig={isExpanded}
             />
-
             <InfoWidget
               name="Main Power"
               key="PWR01"
               type="on/off"
               isActive={true}
               timestamp="2025-06-16T10:47:20Z"
+              isBig={isExpanded}
             />
-
             <InfoWidget
               name="Backup System"
               key="PWR02"
               type="on/off"
               isActive={false}
               timestamp="2025-06-16T10:47:20Z"
+              isBig={isExpanded}
             />
           </div>
         </TabsContent>
 
         <TabsContent value="event-history" className="p-2">
           <EventHistory />
-          {/* <MotorCard/> */}
         </TabsContent>
 
         <TabsContent value="alert-history" className="p-2">

@@ -4,8 +4,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import { MapPin, Maximize, Minimize, Battery, Zap } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { Badge } from '../ui/badge'
@@ -151,6 +154,7 @@ const sampleDevices: Device[] = [
 
 const DeviceMap: React.FC = () => {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false)
+  const [isTableView, setIsTableView] = useState(false)
   const mapRef = useRef<L.Map | null>(null)
 
   // Configure Leaflet icons on client-side only
@@ -192,6 +196,143 @@ const DeviceMap: React.FC = () => {
     }
   }
 
+  const renderMapView = () => (
+    <div className={`flex-1 rounded-lg overflow-hidden ${isMapFullscreen ? 'h-[calc(100vh-120px)]' : ''}`}>
+      <MapContainer
+        center={[18.5204, 73.8567]} // Center on Maharashtra (Pune area)
+        zoom={10}
+        style={{ height: '100%', width: '100%' }}
+        ref={mapRef}
+      >
+        <TileLayer
+          url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
+          attribution='© <a href="https://stadiamaps.com/">Stadia Maps</a>, © <a href="https://openmaptiles.org/">OpenMapTiles</a> © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+        />
+        {sampleDevices.map((device) => (
+          <Marker
+            key={device.id}
+            position={[device.lat, device.lng]}
+          >
+            <Popup>
+              <div className="p-2 min-w-[200px]">
+                <h3 className="font-semibold">{device.name}</h3>
+                <p className="text-sm text-gray-600 mb-2">{device.type}</p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Panel:</span>
+                    <span className="text-sm">{device.panelNo}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge variant={getStatusVariant(device.status)} className="text-xs">
+                      {device.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Assets:</span>
+                    <span className="text-sm">{device.activeAssets}/{device.noOfAssets}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Alerts:</span>
+                    <Badge
+                      variant={device.alerts > 0 ? 'destructive' : 'outline'}
+                      className="text-xs rounded-full"
+                    >
+                      {device.alerts}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Warnings:</span>
+                    <Badge
+                      variant={device.warnings > 0 ? 'secondary' : 'outline'}
+                      className="text-xs rounded-full"
+                    >
+                      {device.warnings}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Battery:</span>
+                    <div className="flex items-center gap-1">
+                      {getBatteryIcon(device.battery)}
+                      <span className="text-sm">{device.battery}%</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 border-t pt-2">Last seen: {device.lastSeen}</p>
+                  {device.temperature && <p className="text-xs">Temperature: {device.temperature}°C</p>}
+                  {device.signal && <p className="text-xs">Signal: {device.signal}%</p>}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
+  )
+
+  const renderTableView = () => (
+    <div className="w-full max-w-xl overflow-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Panel</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Assets</TableHead>
+            <TableHead>Alerts</TableHead>
+            <TableHead>Warnings</TableHead>
+            <TableHead>Battery</TableHead>
+            <TableHead>Temperature</TableHead>
+            <TableHead>Signal</TableHead>
+            <TableHead>Last Seen</TableHead>
+            <TableHead>Location</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sampleDevices.map((device) => (
+            <TableRow key={device.id}>
+              <TableCell>{device.name}</TableCell>
+              <TableCell>{device.type}</TableCell>
+              <TableCell>{device.panelNo}</TableCell>
+              <TableCell>
+                <Badge variant={getStatusVariant(device.status)} className="text-xs">
+                  {device.status}
+                </Badge>
+              </TableCell>
+              <TableCell>{device.activeAssets}/{device.noOfAssets}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={device.alerts > 0 ? 'destructive' : 'outline'}
+                  className="text-xs rounded-full"
+                >
+                  {device.alerts}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant={device.warnings > 0 ? 'secondary' : 'outline'}
+                  className="text-xs rounded-full"
+                >
+                  {device.warnings}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  {getBatteryIcon(device.battery)}
+                  {device.battery}%
+                </div>
+              </TableCell>
+              <TableCell>{device.temperature ? `${device.temperature}°C` : '-'}</TableCell>
+              <TableCell>{device.signal ? `${device.signal}%` : '-'}</TableCell>
+              <TableCell>{device.lastSeen}</TableCell>
+              <TableCell>{device.lat.toFixed(4)}, {device.lng.toFixed(4)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+
   return (
     <Card className={`${isMapFullscreen ? 'fixed inset-0 z-50' : 'h-[65vh]'} gap-0 p-0 rounded-lg`}>
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
@@ -200,94 +341,39 @@ const DeviceMap: React.FC = () => {
             <MapPin className="h-5 w-5" />
             Device Locations
           </CardTitle>
-          <CardDescription>Click on markers to view device details</CardDescription>
+          <CardDescription>{isTableView ? 'View devices in table format' : 'Click on markers to view device details'}</CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={toggleMapFullscreen}>
-          {isMapFullscreen ? (
-            <>
-              <Minimize className="h-4 w-4 mr-2" />
-              Collapse
-            </>
-          ) : (
-            <>
-              <Maximize className="h-4 w-4 mr-2" />
-              Expand
-            </>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="table-view" className="text-sm">
+              Table View
+            </Label>
+            <Switch
+              id="table-view"
+              checked={isTableView}
+              onCheckedChange={setIsTableView}
+            />
+          </div>
+          {!isTableView && (
+            <Button variant="outline" size="sm" onClick={toggleMapFullscreen}>
+              {isMapFullscreen ? (
+                <>
+                  <Minimize className="h-4 w-4 mr-2" />
+                  Collapse
+                </>
+              ) : (
+                <>
+                  <Maximize className="h-4 w-4 mr-2" />
+                  Expand
+                </>
+              )}
+            </Button>
           )}
-        </Button>
+        </div>
       </CardHeader>
       <Separator />
       <CardContent className="p-2 flex h-full overflow-hidden">
-        <div className={`flex-1 rounded-lg overflow-hidden ${isMapFullscreen ? 'h-[calc(100vh-120px)]' : ''}`}>
-          <MapContainer
-            center={[18.5204, 73.8567]} // Center on Maharashtra (Pune area)
-            zoom={10}
-            style={{ height: '100%', width: '100%' }}
-            ref={mapRef}
-          >
-            <TileLayer
-              url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
-              attribution='© <a href="https://stadiamaps.com/">Stadia Maps</a>, © <a href="https://openmaptiles.org/">OpenMapTiles</a> © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-            />
-            {sampleDevices.map((device) => (
-              <Marker
-                key={device.id}
-                position={[device.lat, device.lng]}
-              >
-                <Popup>
-                  <div className="p-2 min-w-[200px]">
-                    <h3 className="font-semibold">{device.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{device.type}</p>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Panel:</span>
-                        <span className="text-sm">{device.panelNo}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Status:</span>
-                        <Badge variant={getStatusVariant(device.status)} className="text-xs">
-                          {device.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Assets:</span>
-                        <span className="text-sm">{device.activeAssets}/{device.noOfAssets}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Alerts:</span>
-                        <Badge
-                          variant={device.alerts > 0 ? 'destructive' : 'outline'}
-                          className="text-xs rounded-full"
-                        >
-                          {device.alerts}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Warnings:</span>
-                        <Badge
-                          variant={device.warnings > 0 ? 'secondary' : 'outline'}
-                          className="text-xs rounded-full"
-                        >
-                          {device.warnings}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Battery:</span>
-                        <div className="flex items-center gap-1">
-                          {getBatteryIcon(device.battery)}
-                          <span className="text-sm">{device.battery}%</span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 border-t pt-2">Last seen: {device.lastSeen}</p>
-                      {device.temperature && <p className="text-xs">Temperature: {device.temperature}°C</p>}
-                      {device.signal && <p className="text-xs">Signal: {device.signal}%</p>}
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
-        </div>
+        {isTableView ? renderTableView() : renderMapView()}
       </CardContent>
     </Card>
   )
